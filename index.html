@@ -82,15 +82,307 @@
  		    </p>
        </div>
        <div>
-       <p><b>Abstract:</b>
+       <p><b>Abstract:</b> Breakthroughs in text-to-music generation models are transforming the creative landscape, equipping musicians with innovative tools for composition and experimentation like never before. However, controlling the generation process to achieve a specific desired outcome remains a significant challenge. Even a minor change in the text prompt, combined with the same random seed, can drastically alter the generated piece. In this paper, we explore the application of existing text-to-music diffusion models for instrument editing. Specifically, for an existing audio track, we aim to leverage a pretrained text-to-music diffusion model to edit the instrument while preserving the underlying content. Based on the insight that the model first focuses on the overall structure or content of the audio, then adds instrument information, and finally refines the quality, we show that selecting a well-chosen intermediate timestep, identified through an instrument classifier, yields a balance between preserving the original piece's content and achieving the desired timbre. Our method does not require additional training of the text-to-music diffusion model, nor does it compromise the generation process's speed.
        </p>
        <h3>
          Contents
        </h3>
- 	      
- 
- 
-   <h3 id="references">References</h3>
-       </div>
+      </h3>
+      <ul>
+        <li><a href="#illustration_generation_process">I. Illustration of the Generation Process</a></li>
+        <li><a href="#comparison">II. Comparison of the Different Approaches for Timestep Selection</a></li>
+        <li><a href="#comparison2">III. Comparison with MusicMagus</a></li>
+        <li><a href="#more_samples">IV. More Samples</a></li>
+        <li><a href="#limitations">V. Limitations</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+
+      <h2 id="illustration_generation_process">I. Illustration of the Generation Process</h2>
+      <p>This sample corresponds to the example treated in Section 4.1 of the paper. It showcases the effect of changing the instrument name in the prompt at different timesteps of a 50-step inference process. As discussed in the paper, if we swap the instrument name in the prompt during the early stages of the sampling process, the content is not fully preserved. On the other hand, if we do so during the later stages of inference, the timbre information has already been integrated into the latent, making it too late to modify at this point. By selecting an appropriate timestep, the desired outcome is achieved: playing the original content with the target instrument.</p>
+      <table class="audio-table">
+        <tbody>
+          <tr>
+            <td align="center">Original Audio<br/>
+              <img src="samples/Illustration/mel_spectrogram_A soft and elegant piano legato note._before.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A soft and elegant piano legato note._before.wav"></audio>
+            </td>
+            <td align="center">t=39<br>(Content changes)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_10.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_10.wav"></audio>
+            </td>
+            <td align="center">t=21<br>(Optimal timestep)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_28.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_28.wav"></audio>
+            </td>
+            <td align="center">t=9<br>(Timbre cannot be altered)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_40.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_40.wav"></audio>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <h2 id="comparison">II. Comparison of the Different Approaches for Timestep Selection</h2>
+      <p>In this section, we compare the different methods for selecting the timestep at which the prompt is changed, as outlined in our paper. Additionally, we compare to the <b>audio-to-audio</b> (Audio2Audio) method from the Stable Audio 2.0 [1] paper (Section 4.6), which was not covered in our paper. In this method, the noise is initialized with the original audio, and the prompt containing the target instrument is used throughout the entire generation process. Similarly to the other approaches in this section, we apply the audio-to-audio method using the weights from Stable Audio Open [2]. As the results show, this approach does not preserve the original content.</p>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <th style="width: 400px;">Prompt</th>
+            <th style="width: 200px;">Editing</th>
+            <th>Original Audio</th>
+            <th>Diff-TONE</th>
+            <th>Diff-Midpoint</th>
+            <th>Diff-Random</th>
+            <th>Audio2Audio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><h7>A funky and groovy saxophone riff</h7></td>
+            <td><h7>Saxophone &rarr; Piano</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/sax2pia/A funky and groovy saxophone riff._before_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/sax2pia/A funky and groovy piano riff._after_27_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Midpoint/sax2pia/A funky and groovy piano riff._after_24_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Random/sax2pia/A funky and groovy piano riff._after_8_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/SAO_transfer/A funky and groovy piano riff.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A delicate and fluttering flute phrase</h7></td>
+            <td><h7>Flute &rarr; Organ</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/flu2org/A delicate and fluttering flute phrase._before_2_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/flu2org/A delicate and fluttering organ phrase._after_20_2_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Midpoint/flu2org/A delicate and fluttering organ phrase._after_24_2_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Random/flu2org/A delicate and fluttering organ phrase._after_4_2_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/SAO_transfer/A delicate and fluttering organ phrase.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A playful and swinging clarinet motif</h7></td>
+            <td><h7>Clarinet &rarr; Violin</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/cla2vio/A playful and swinging clarinet motif._before_29_1_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/cla2vio/A playful and swinging violin motif._after_29_1_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Midpoint/cla2vio/A playful and swinging violin motif._after_24_1_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Random/cla2vio/A playful and swinging violin motif._after_38_1_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/SAO_transfer/A playful and swinging violin motif.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="comparison2">III. Comparison with MusicMagus</h2>
+      <p>In this section, we compare our method, Diff-TONE, with MusicMagus [3]. It is important to note that the original audio inputs differ between the two approaches: MusicMagus is built upon AudioLDM 2 [4], while our method is based on Stable Audio Open [2]. Additionally, for MusicMagus, we retained the original hyperparameter settings, including 100 diffusion steps, whereas our approach uses only 50 diffusion steps.</p>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <th style="width: 400px;">Prompt</th>
+            <th style="width: 200px;">Editing</th>
+            <th>Diff-TONE<br>(Original Audio)</th>
+            <th>Diff-TONE<br>(Edited Audio)</th>
+            <th>MusicMagus<br>(Original Audio)</th>
+            <th>MusicMagus<br>(Edited Audio)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><h7>A soft and twinkling piano arpeggio</h7></td>
+            <td><h7>Piano &rarr; Acoustic Guitar</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/pia2gac/A soft and twinkling piano arpeggio._before_6_3.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/pia2gac/A soft and twinkling acoustic guitar arpeggio._after_28_6_3.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/pia2gac/piano_acoustic-guitar_orig_1.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/pia2gac/piano_acoustic-guitar_edit_1.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A heartfelt and lyrical piano melody</h7></td>
+            <td><h7>Piano &rarr; Organ</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/pia2org/A heartfelt and lyrical piano melody._before_6_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/pia2org/A heartfelt and lyrical organ melody._after_29_6_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/pia2org/piano_organ_orig_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/pia2org/piano_organ_edit_6.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A soaring and passionate violin phrase</h7></td>
+            <td><h7>Violin &rarr; Piano</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/vio2pia/A soaring and passionate violin phrase._before_9_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/vio2pia/A soaring and passionate piano phrase._after_28_9_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/vio2pia/violin_piano_orig_2.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/MusicMagus/vio2pia/violin_piano_edit_2.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="more_samples">IV. More Samples</h2>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <th style="width: 400px;">Prompt</th>
+            <th style="width: 200px;">Editing</th>
+            <th>Original Audio</th>
+            <th>Diff-TONE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><h7>A jazzy clarinet phrase with smooth articulation</h7></td>
+            <td><h7>Clarinet &rarr; Cello</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/cla2cel/A jazzy clarinet phrase with smooth articulation._before_1_0.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/cla2cel/A jazzy cello phrase with smooth articulation._after_27_1_0.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A warm and breathy clarinet sustain</h7></td>
+            <td><h7>Clarinet &rarr; Cello</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/cla2cel/A warm and breathy clarinet sustain._before_1_0.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/cla2cel/A warm and breathy cello sustain._after_27_1_0.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A soft and harmonic acoustic guitar pluck</h7></td>
+            <td><h7>Acoustic Guitar &rarr; Cello</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/gac2cel/A soft and harmonic acoustic guitar pluck._before_3_0.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/gac2cel/A soft and harmonic cello pluck._after_25_3_0.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A warm and melodic acoustic guitar strum</h7></td>
+            <td><h7>Acoustic Guitar &rarr; Cello</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/gac2cel/A warm and melodic acoustic guitar strum._before_3_0.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/gac2cel/A warm and melodic cello strum._after_25_3_0.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A reverberant electric guitar delay effect</h7></td>
+            <td><h7>Electric Guitar &rarr; Trumpet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/gel2tru/A reverberant electric guitar delay effect._before_4_8.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/gel2tru/A reverberant trumpet delay effect._after_25_4_8.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A screaming electric guitar feedback note</h7></td>
+            <td><h7>Electric Guitar &rarr; Trumpet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/gel2tru/A screaming electric guitar feedback note._before_4_8.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/gel2tru/A screaming trumpet feedback note._after_28_4_8.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A wailing electric guitar bend with reverb</h7></td>
+            <td><h7>Electric Guitar &rarr; Trumpet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/gel2tru/A wailing electric guitar bend with reverb._before_4_8.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/gel2tru/A wailing trumpet bend with reverb._after_23_4_8.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A grand and sustained organ note</h7></td>
+            <td><h7>Organ &rarr; Clarinet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/org2cla/A grand and sustained organ note._before_5_1.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/org2cla/A grand and sustained clarinet note._after_23_5_1.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A reverberant and eerie organ chord</h7></td>
+            <td><h7>Organ &rarr; Clarinet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/org2cla/A reverberant and eerie organ chord._before_5_1.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/org2cla/A reverberant and eerie clarinet chord._after_28_5_1.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A melancholic and atmospheric piano solo</h7></td>
+            <td><h7>Piano &rarr; Organ</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/pia2org/A melancholic and atmospheric piano solo._before_6_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/pia2org/A melancholic and atmospheric organ solo._after_17_6_5.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A soft and emotional piano motif</h7></td>
+            <td><h7>Piano &rarr; Organ</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/pia2org/A soft and emotional piano motif._before_6_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/pia2org/A soft and emotional organ motif._after_31_6_5.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A relaxed and jazzy saxophone run</h7></td>
+            <td><h7>Saxophone &rarr; Piano</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/sax2pia/A relaxed and jazzy saxophone run._before_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/sax2pia/A relaxed and jazzy piano run._after_28_7_6.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A smooth and sultry saxophone melody</h7></td>
+            <td><h7>Saxophone &rarr; Piano</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/sax2pia/A smooth and sultry saxophone melody._before_7_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/sax2pia/A smooth and sultry piano melody._after_29_7_6.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A noble and commanding trumpet blast</h7></td>
+            <td><h7>Trumpet &rarr; Acoustic Guitar</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/tru2gac/A noble and commanding trumpet blast._before_31_8_3.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/tru2gac/A noble and commanding acoustic guitar blast._after_31_8_3.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A quick and nimble flute trill</h7></td>
+            <td><h7>Flute &rarr; Cello</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/flu2cel/A quick and nimble flute trill._before_28_2_0.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/flu2cel/A quick and nimble cello trill._after_28_2_0.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A bright and airy flute passage</h7></td>
+            <td><h7>Flute &rarr; Violin</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/flu2vio/A bright and airy flute passage._before_27_2_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/flu2vio/A bright and airy violin passage._after_27_2_9.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A quick and nimble flute trill</h7></td>
+            <td><h7>Flute &rarr; Violin</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/flu2vio/A quick and nimble flute trill._before_28_2_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/flu2vio/A quick and nimble violin trill._after_28_2_9.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A mystical and airy flute trill</h7></td>
+            <td><h7>Flute &rarr; Violin</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/orig/flu2vio/A mystical and airy flute trill._before_25_2_9.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Diff-Tone/flu2vio/A mystical and airy violin trill._after_25_2_9.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="limitations">V. Limitations</h2>
+      <p>Sometimes, our approach fails when a non-optimal timestep is selected. This can result in either generating different content than intended, or, producing audio that is identical to the original input.</p>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <th style="width: 400px;">Prompt</th>
+            <th style="width: 200px;">Editing</th>
+            <th>Original Audio</th>
+            <th>Diff-TONE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><h7>A melancholic violin legato phrase</h7></td>
+            <td><h7>Violin &rarr; Saxophone</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/vio2sax/A melancholic violin legato phrase._before_25_9_7.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/vio2sax/A melancholic saxophone legato phrase._after_25_9_7.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A blues-rock electric guitar bend</h7></td>
+            <td><h7>Electric Guitar &rarr; Organ</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/gel2org/A blues-rock electric guitar bend._before_0_4_5.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/gel2org/A blues-rock organ bend._after_0_4_5.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A rich and harmonic cello phrase</h7></td>
+            <td><h7>Cello &rarr; Trumpet</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/cel2tru/A rich and harmonic cello phrase._before_41_0_8.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/cel2tru/A rich and harmonic trumpet phrase._after_41_0_8.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A percussive and rhythmic acoustic guitar riff</h7></td>
+            <td><h7>Piano &rarr; Acoustic Guitar</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/pia2gac/A percussive and rhythmic acoustic guitar riff._before_14_3_6.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/pia2gac/A percussive and rhythmic piano riff._after_14_3_6.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><h7>A fluid and agile clarinet solo</h7></td>
+            <td><h7>Clarinet &rarr; Flute</h7></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/cla2flu/A fluid and agile clarinet solo._before_25_1_2.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="samples/Limitations/cla2flu/A fluid and agile flute solo._after_25_1_2.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="references">References</h3>
+        <p>
+          [1] Zach Evans, Julian D. Parker, CJ Carr, Zack Zukowski, Josiah Taylor, and Jordi Pons. Long-form music generation with latent diffusion. In <i>Proc. ISMIR</i>, 2024.<br/>
+          [2] Zach Evans, Julian D. Parker, CJ Carr, Zack Zukowski, Josiah Taylor, and Jordi Pons. Stable Audio Open. In <i>Proc. ICASSP</i>, 2025.<br/>
+		  [3] Yixiao Zhang, Yukara Ikemiya, Gus Xia, Naoki Murata, Marco A. Martínez-Ramírez, Wei-Hsiang Liao, Yuki Mitsufuji, and Simon Dixon. MusicMagus: Zero-Shot Text-to-Music Editing via Diffusion Models. In <i>Proc. IJCAI</i>, 2024.<br/>
+		  [4] Haohe Liu, Qiao Tian, Yi Yuan, Xubo Liu, Xinhao Mei, Qiuqiang Kong, Yuping Wang, Wenwu Wang, Yuxuan Wang, and Mark D Plumbley. AudioLDM 2: Learning holistic audio generation with self-supervised pretraining. <i>IEEE/ACM Trans. Audio, Speech and Lang. Proc. 32</i>, 2024.<br/>
+        </p>
+      </div>
     </body>
  </html>
