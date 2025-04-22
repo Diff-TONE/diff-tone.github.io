@@ -12,6 +12,9 @@
             player.play();
           }}
        </script>
+       <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+       <script id="MathJax-script" async
+               src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
        <style>
           .audio-cell {
           /* Center audio widgets in the table cell. */
@@ -84,6 +87,12 @@
        <div>
        <p><b>Abstract:</b> Breakthroughs in text-to-music generation models are transforming the creative landscape, equipping musicians with innovative tools for composition and experimentation like never before. However, controlling the generation process to achieve a specific desired outcome remains a significant challenge. Even a minor change in the text prompt, combined with the same random seed, can drastically alter the generated piece. In this paper, we explore the application of existing text-to-music diffusion models for instrument editing. Specifically, for an existing audio track, we aim to leverage a pretrained text-to-music diffusion model to edit the instrument while preserving the underlying content. Based on the insight that the model first focuses on the overall structure or content of the audio, then adds instrument information, and finally refines the quality, we show that selecting a well-chosen intermediate timestep, identified through an instrument classifier, yields a balance between preserving the original piece's content and achieving the desired timbre. Our method does not require additional training of the text-to-music diffusion model, nor does it compromise the generation process's speed.
        </p>
+
+       <figure style="text-align: center;">
+         <img src="teaser.png" alt="Teaser" width="800">
+         <figcaption style="margin-top: 0;"><b>Figure:</b> Pipeline of Diff-TONE: We start from an initial noisy latent \( \mathbf{x}_T \) used to generate the audio with the original instrument. At each iteration of the inference process, we compute \( \tilde{\mathbf{x}}_0 \) and pass it to the classifier. Once the classifier does not change its prediction, we consider that to be the best time to substitute the target instrument for the initial instrument in the prompt. And we resume the generation process.</figcaption>
+       </figure>
+
        <h3>
          Contents
        </h3>
