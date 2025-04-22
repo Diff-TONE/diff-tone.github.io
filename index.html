@@ -81,6 +81,7 @@
        </article>
        <div>
          <p>
+                Submission ID: 352<br>
  		        Anonymous
  		    </p>
        </div>
@@ -107,7 +108,7 @@
       </ul>
 
       <h2 id="illustration_generation_process">I. Illustration of the Generation Process</h2>
-      <p>This sample corresponds to the example treated in Section 4.1 of the paper. It showcases the effect of changing the instrument name in the prompt at different timesteps of a 50-step inference process. As discussed in the paper, if we swap the instrument name in the prompt during the early stages of the sampling process, the content is not fully preserved. On the other hand, if we do so during the later stages of inference, the timbre information has already been integrated into the latent, making it too late to modify at this point. By selecting an appropriate timestep, the desired outcome is achieved: playing the original content with the target instrument.</p>
+      <p>This sample corresponds to the example treated in Section 4.1 of the paper. It showcases the effect of changing the instrument name in the prompt at different timesteps of a 50-step inference process. As discussed in the paper, if we swap the instrument name in the prompt during the early stages of the sampling process (t=39), the content is not fully preserved. On the other hand, if we do so during the later stages of inference (t=9), the timbre information has already been integrated into the latent, making it too late to modify at this point. By selecting an appropriate timestep (t=21), the desired outcome is achieved: playing the original content with the target instrument.</p>
       <table class="audio-table">
         <tbody>
           <tr>
@@ -133,7 +134,8 @@
       </table>
 
       <h2 id="comparison">II. Comparison of the Different Approaches for Timestep Selection</h2>
-      <p>In this section, we compare the different methods for selecting the timestep at which the prompt is changed, as outlined in our paper. Additionally, we compare to the <b>audio-to-audio</b> (Audio2Audio) method from the Stable Audio 2.0 [1] paper (Section 4.6), which was not covered in our paper. In this method, the noise is initialized with the original audio, and the prompt containing the target instrument is used throughout the entire generation process. Similarly to the other approaches in this section, we apply the audio-to-audio method using the weights from Stable Audio Open [2]. As the results show, this approach does not preserve the original content.</p>
+      <p>In this section, we compare the different methods for selecting the timestep at which the prompt is changed, as outlined in our paper: Diff-TONE, Diff-Midpoint, where the prompt change occurs precisely at the midpoint of the sampling process, and Diff-Random, where the change happens at a random point during generation.</p>
+      <p>Additionally, we compare to the <b>audio-to-audio</b> (Audio2Audio) method from the Stable Audio 2.0 [1] paper (Section 4.6), which was not covered in our paper. In this method, the noise is initialized with the original audio, and the prompt containing the target instrument is used throughout the entire generation process. Similarly to the other approaches in this section, we apply the audio-to-audio method using the weights from Stable Audio Open [2]. As the results show, this approach does not preserve the original content.</p>
       <table class="audio-table">
         <thead>
           <tr>
