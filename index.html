@@ -108,25 +108,25 @@
       </ul>
 
       <h2 id="illustration_generation_process">I. Illustration of the Generation Process</h2>
-      <p>This sample corresponds to the example treated in Section 4.1 of the paper. It showcases the effect of changing the instrument name in the prompt at different timesteps of a 50-step inference process. As discussed in the paper, if we swap the instrument name in the prompt during the early stages of the sampling process (t=39), the content is not fully preserved. On the other hand, if we do so during the later stages of inference (t=9), the timbre information has already been integrated into the latent, making it too late to modify at this point. By selecting an appropriate timestep (t=21), the desired outcome is achieved: playing the original content with the target instrument.</p>
+      <p>This sample corresponds to the example treated in Section 4.1 of the paper. It showcases the effect of changing the instrument name in the prompt at different timesteps of a 50-step inference process. As discussed in the paper, if we swap the instrument name in the prompt during the early stages of the sampling process (t=45), the content is not fully preserved. On the other hand, if we do so during the later stages of inference (t=14), the timbre information has already been integrated into the latent, making it too late to modify at this point. By selecting an appropriate timestep (t=34), the desired outcome is achieved: playing the original content with the target instrument.</p>
       <table class="audio-table">
         <tbody>
           <tr>
             <td align="center"><br>Original Audio<br/>
-              <img src="samples/Illustration/mel_spectrogram_A soft and elegant piano legato note._before.png" width="300" alt=""/> <br/>
-              <audio controls=""><source src="samples/Illustration/A soft and elegant piano legato note._before.wav"></audio>
+              <img src="samples/Illustration/mel_spectrogram_A_fast_and_energetic_piano_passage_before.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A_fast_and_energetic_piano_passage_before.wav"></audio>
             </td>
-            <td align="center">t=39<br>(Content changes)<br/>
-              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_10.png" width="300" alt=""/> <br/>
-              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_10.wav"></audio>
+            <td align="center">t=45<br>(Content changes)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A_fast_and_energetic_violin_passage_after_4.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A_fast_and_energetic_violin_passage_after_4.wav"></audio>
             </td>
-            <td align="center">t=21<br>(Optimal timestep)<br/>
-              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_28.png" width="300" alt=""/> <br/>
-              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_28.wav"></audio>
+            <td align="center">t=34<br>(Optimal timestep)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A_fast_and_energetic_violin_passage_after_15.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A_fast_and_energetic_violin_passage_after_15.wav"></audio>
             </td>
-            <td align="center">t=9<br>(Timbre cannot be altered)<br/>
-              <img src="samples/Illustration/mel_spectrogram_A soft and elegant violin legato note._after_40.png" width="300" alt=""/> <br/>
-              <audio controls=""><source src="samples/Illustration/A soft and elegant violin legato note._after_40.wav"></audio>
+            <td align="center">t=14<br>(Timbre cannot be altered)<br/>
+              <img src="samples/Illustration/mel_spectrogram_A_fast_and_energetic_violin_passage_after_35.png" width="300" alt=""/> <br/>
+              <audio controls=""><source src="samples/Illustration/A_fast_and_energetic_violin_passage_after_35.wav"></audio>
             </td>
           </tr>
 
